@@ -13,6 +13,7 @@ spec:
       labels:
         app: database
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: database
           image: ravisrma/database:latest
