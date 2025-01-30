@@ -1,0 +1,57 @@
+/* Home.css */
+
+.home-container {
+  background-image: url('assets/Student.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  filter: brightness(60%);
+}
+
+.content {
+  text-align: center;
+  color: #ffffff;
+}
+
+.title {
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  border: 2px solid #ffffff; 
+  padding: 20px 30px; 
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background */
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.student-button,
+.teacher-button { 
+  background: linear-gradient(to bottom, #00c6ff, #0072ff);
+  color: #ffffff;
+  padding: 20px 40px; 
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 0 20px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.student-button:hover,
+.teacher-button:hover {
+  transform: scale(1.1);
+  background: linear-gradient(to bottom, #0072ff, #00c6ff);
+}
