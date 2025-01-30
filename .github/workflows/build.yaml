@@ -20,5 +20,9 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
         SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST }}
-        SONAR_PROJECT_KEY: 'three-tier-app'
-        SONAR_PROJECT_NAME: 'three-tier-app'
+      with:
+        args: >
+          -Dsonar.projectKey=three-tier-app
+          -Dsonar.projectName=three-tier-app
+          -Dsonar.projectVersion=1.0
+          -Dsonar.sources=.
