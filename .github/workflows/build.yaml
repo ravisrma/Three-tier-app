@@ -1,6 +1,10 @@
-name: CI/CD workflow for Maven Build and Sonar Code scan
+name: CI/CD Pipeline
+
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
   workflow_dispatch:
@@ -21,8 +25,8 @@ jobs:
       run: npm install
 
     # SonarQube Analysis
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@master
+    - name: SonarQube Cloud Scan
+      uses: SonarSource/sonarcloud-github-action@v4.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
