@@ -97,19 +97,17 @@ function Student() {
       <div className="student-container">
         <div className="button-container-student">
           <Link to="/">
-            <button className="button-63">Back to Menu</button>
+            <button className="button-63" role="button">Back to Menu</button>
           </Link>
           <Link to="/teacher">
-            <button className="button-63">Teacher</button>
+            <button className="button-63" role="button">Teacher</button>
           </Link>
         </div>
         <div className="content">
           <h2 className='store-student-details' style={{ marginTop: '150px', marginLeft: '100px' }}>Student Details</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>
-                Name:
-              </label>
+              <label>Name:</label>
               <input
                 type="text"
                 name="name"
@@ -119,9 +117,7 @@ function Student() {
               />
             </div>
             <div className="form-group">
-              <label>
-                Roll No (Must be Number):
-              </label>
+              <label>Roll No (Must be Number):</label>
               <input
                 type="text"
                 name="rollNo"
@@ -131,9 +127,7 @@ function Student() {
               />
             </div>
             <div className="form-group">
-              <label>
-                Class:
-              </label>
+              <label>Class:</label>
               <input
                 type="text"
                 name="class"

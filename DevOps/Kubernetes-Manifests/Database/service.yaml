@@ -4,9 +4,10 @@ metadata:
   name: database
   namespace: mern
 spec:
-  ports:
-  - port: 3306
-    protocol: TCP
-  type: ClusterIP
   selector:
-    role: database
+    app: database
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP

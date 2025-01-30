@@ -1,18 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mern-alb-dev
+  name: three-tier
   namespace: mern
-  annotations:
-    kubernetes.io/ingress.class: alb
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/rewrite-target: /$2
 spec:
-  ingressClassName: alb
+  ingressClassName: nginx
   rules:
-    - host: <your-domain-name>
+    - host: ravicloudexper.online
       http:
         paths:
           - path: /

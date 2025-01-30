@@ -3,40 +3,45 @@ kind: Deployment
 metadata:
   name: database
   namespace: mern
-  labels:
-    role: database
-    env: dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      role: database
+      app: database
   template:
     metadata:
       labels:
-        role: database
+        app: database
     spec:
+      automountServiceAccountToken: false
       containers:
-      - name: database
-        image: avian19/mysql-mern:2
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3306
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: password
-        - name: MYSQL_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: database
-        volumeMounts:
-        - name: db-storage
-          mountPath: /var/lib/mysql
+        - name: database
+          image: ravisrma/database:latest
+          imagePullPolicy: Always
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: database
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: mypvc
+              mountPath: /var/lib/mysql
       volumes:
-      - name: db-storage
-        persistentVolumeClaim:
-          claimName: db-pvc
+        - name: mypvc
+          persistentVolumeClaim:
+            claimName: mypvc

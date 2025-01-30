@@ -3,49 +3,62 @@ kind: Deployment
 metadata:
   name: backend
   namespace: mern
-  labels:
-    role: backend
-    env: dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      role: backend
+      app: backend
   template:
     metadata:
       labels:
-        role: backend
+        app: backend
     spec:
+      automountServiceAccountToken: false
       containers:
-      - name: backend
-        image: avian19/backend:1
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 3500
-        livenessProbe:
-          httpGet:
-            path: backend/
-            port: 3500
-          initialDelaySeconds: 3
-          periodSeconds: 10
-        env:
-        - name: host
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: host
-        - name: user
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: user
-        - name: password
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: password
-        - name: database
-          valueFrom:
-            secretKeyRef:
-              name: db-credentials
-              key: database
+        - name: backend
+          image: ravisrma/backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3500
+          livenessProbe:
+            httpGet:
+              path: backend/
+              port: 3500
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: backend/
+              port: 3500
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          env:
+          - name: host
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: host
+          - name: user
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: user
+          - name: password
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: password
+          - name: database
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: database
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
