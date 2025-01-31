@@ -33,7 +33,7 @@ jobs:
     # Build Docker image
     - name: Build Frontend Docker image
       run: |
-        docker build -t frontend:${{ github.sha }} ./student-teacher-app/Dockerfile-frontend
+        docker build -t frontend:${{ github.sha }} ./student-teacher-app/Dockerfile-Frontend
         docker tag frontend:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
     
     # Trivy Scan
