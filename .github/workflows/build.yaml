@@ -23,6 +23,7 @@ jobs:
     # Install NodeJS dependencies
     - name: Install NodeJS dependencies
       run: npm install
+      working-directory: ./student-teacher-app
 
     # SonarQube Analysis
     - name: SonarQube Scan
@@ -33,8 +34,9 @@ jobs:
     # Build Docker image
     - name: Build Frontend Docker image
       run: |
-        docker build -t frontend:${{ github.sha }} ./student-teacher-app/Dockerfile-Frontend .
+        docker build -t frontend:${{ github.sha }} -f ./student-teacher-app/Dockerfile-Frontend ./student-teacher-app
         docker tag frontend:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
+
     
     # Trivy Scan
     - name: Trivy Scan
