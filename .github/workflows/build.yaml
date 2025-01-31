@@ -33,8 +33,9 @@ jobs:
     # Build Docker image
     - name: Build Frontend Docker image
       run: |
-        docker build -t frontend:${{ github.sha }} student-teacher-app
+        docker build -t frontend:${{ github.sha }} ./student-teacher-app
         docker tag frontend:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
-      # Trivy Scan
+    
+    # Trivy Scan
     - name: Trivy Scan
       run: docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image frontend:${{ github.sha}}
