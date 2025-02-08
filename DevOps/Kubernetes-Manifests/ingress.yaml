@@ -1,10 +1,21 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: three-tier
+  name: alb-ingress-rules
   namespace: mern
+  annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: "alb-ingress"
+    alb.ingress.kubernetes.io/ip-address-type: ipv4
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '5'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '5'
+    alb.ingress.kubernetes.io/success-codes: '200'
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb  # Assuming you are using AWS ALB Ingress Controller
   rules:
     - host: ravicloudexper.online
       http:
