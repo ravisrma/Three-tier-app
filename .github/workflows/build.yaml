@@ -24,6 +24,7 @@ env:
 
 jobs:
   build:
+    if: ${{ github.event.inputs.destroy != 'true' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
