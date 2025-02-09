@@ -189,7 +189,15 @@ jobs:
 
       - name: Deploy ELK Stack
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: kubectl apply -f ./elk
+        run: | 
+          cd elk
+          kubectl config view
+          kubectl apply -f . --validate=false
+    
+      - name: Verify kubectl configuration
+        run: | 
+          sleep 30
+          kubectl get svc -n elk
 
   destroy:
     runs-on: ubuntu-latest
