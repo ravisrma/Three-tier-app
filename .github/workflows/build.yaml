@@ -175,15 +175,50 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
       
-  deploy_elk:
-    runs-on: ubuntu-latest
-    needs: terraform
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./elk
+  # deploy_elk:
+  #   runs-on: ubuntu-latest
+  #   needs: terraform
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   defaults:
+  #     run:
+  #       shell: bash
+  #       working-directory: ./elk
 
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4.2.2
+
+  #     - name: Configure AWS credentials from AWS account
+  #       uses: aws-actions/configure-aws-credentials@v4.0.3
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.AWS_REGION }}
+
+  #     - name: Install kubectl
+  #       run: |
+  #         sudo apt-get install kubectl -y
+
+  #     - name: Update kubeconfig
+  #       run: aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name eks-cluster
+
+  #     - name: Wait for resources to be created
+  #       run: sleep 30
+
+  #     - name: Deploy ELK Stack
+  #       run: | 
+  #         kubectl config view
+  #         kubectl apply -f . --validate=false
+    
+  #     - name: Verify kubectl configuration
+  #       run: | 
+  #         sleep 30
+  #         kubectl get svc -n elk
+
+  deploy_elk_helm:
+    runs-on: ubuntu-latest
+    needs: [terraform]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
@@ -205,15 +240,43 @@ jobs:
       - name: Wait for resources to be created
         run: sleep 30
 
-      - name: Deploy ELK Stack
-        run: | 
-          kubectl config view
-          kubectl apply -f . --validate=false
-    
-      - name: Verify kubectl configuration
-        run: | 
-          sleep 30
-          kubectl get svc -n elk
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Add Elastic Helm Repo
+        run: helm repo add elastic https://helm.elastic.co
+
+      - name: Update Helm Repos
+        run: helm repo update
+
+      - name: Create and Apply Persistent Volumes for Elasticsearch
+        working-directory: ./elasticsearch
+        run: kubectl apply -f pv.yaml
+
+      - name: Install Elasticsearch using Helm
+        working-directory: ./elasticsearch
+        run: helm install elasticsearch elastic/elasticsearch --version="8.5.1" -f values.yaml
+
+      - name: Create and Apply Persistent Volumes for Filebeat
+        working-directory: ./filebeat
+        run: kubectl apply -f pv.yaml
+
+      - name: Install Filebeat using Helm
+        working-directory: ./filebeat
+        run: helm install filebeat elastic/filebeat --version="8.5.1" -f values.yaml
+
+      - name: Install Kibana using Helm
+        working-directory: ./kibana
+        run: helm install kibana elastic/kibana --version="8.5.1"
+
+      - name: Apply Ingress for Kibana
+        working-directory: ./kibana
+        run: kubectl apply -f ingress.yaml
+
+      - name: Apply Logstash Configuration
+        working-directory: ./logstash
+        run: kubectl apply -f .
 
   destroy:
     runs-on: ubuntu-latest
@@ -250,21 +313,18 @@ jobs:
   notify:
     name: Notify on Slack
     runs-on: ubuntu-latest
-    needs: [build, terraform]
-    if: ${{ github.base_ref == 'main' && github.event_name == 'pull_request' }}
     steps:
-    - name: Notify on Success
-      if: success()
-      uses: abinoda/slack-action@master
-      env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    - uses: 8398a7/action-slack@v3
       with:
-        args: '{\"channel\":\"${{ secrets.SLACK_PR_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\":tada: *Pull Request:* ${{ github.event.pull_request.title }} :tada:\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Contributor :* ${{ github.event.pull_request.user.login }}\n*Request State:* ${{ github.event.pull_request.state }}\n*Status:* Success :white_check_mark:\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"<${{ github.event.pull_request.html_url }}|View Pull Request>\"}}]}'
-
-    - name: Notify on Failure
-      if: failure()
-      uses: abinoda/slack-action@master
+        status: custom
+        fields: workflow,job,commit,repo,ref,author,took
+        custom_payload: |
+          {
+            attachments: [{
+              color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+              text: `${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO}@${process.env.AS_REF} by ${process.env.AS_AUTHOR} ${{ job.status }} in ${process.env.AS_TOOK}`,
+            }]
+          }
       env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      with:
-        args: '{\"channel\":\"${{ secrets.SLACK_PR_CHANNEL_ID }}\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\":x: *Pull Request:* ${{ github.event.pull_request.title }} :x:\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Contributor :* ${{ github.event.pull_request.user.login }}\n*Request State:* ${{ github.event.pull_request.state }}\n*Status:* Failure :x:\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"<${{ github.event.pull_request.html_url }}|View Pull Request>\"}}]}'
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: always() # Pick up events even if the job fails or is canceled.
