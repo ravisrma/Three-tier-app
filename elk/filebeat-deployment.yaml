@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: filebeat
-        image: elastic/filebeat
+        image: elastic/filebeat:8.16.3
         args: [
           "-e", 
         ]
