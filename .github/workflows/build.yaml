@@ -207,7 +207,6 @@ jobs:
 
       - name: Deploy ELK Stack
         run: | 
-          cd $(pwd)/elk
           kubectl config view
           kubectl apply -f . --validate=false
     
