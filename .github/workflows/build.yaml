@@ -190,6 +190,7 @@ jobs:
       - name: Deploy ELK Stack
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: | 
+          cd ~
           cd $(pwd)/Three-tier-app/elk/
           kubectl config view
           kubectl apply -f . --validate=false
