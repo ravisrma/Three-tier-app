@@ -174,6 +174,22 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve -input=false
+      
+      - name: Install kubectl
+        run: |
+          sudo apt-get install kubectl -y
+
+      - name: Update kubeconfig
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name eks-cluster
+      
+      - name: Wait for resources to be created
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: sleep 30
+
+      - name: Deploy ELK Stack
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: kubectl apply -f ./elk
 
   destroy:
     runs-on: ubuntu-latest
