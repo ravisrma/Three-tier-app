@@ -104,6 +104,21 @@ jobs:
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push')
         run: terraform apply -auto-approve -input=false
 
+      - name: Install kubectl
+        run: |
+          sudo apt-get install kubectl -y
+
+      - name: Update kubeconfig
+        run: aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name eks-cluster
+
+      - name: Wait for resources to be created
+        run: sleep 30
+
+      - name: Deploy to EKS Autoscaler
+        run: |
+          cd $(pwd)/autoscaler
+          kubectl apply -f autoscaler/cluster-autoscaler.yaml
+          
   destroy:
     runs-on: ubuntu-latest
     needs: [terraform]
