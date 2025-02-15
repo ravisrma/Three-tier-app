@@ -116,7 +116,7 @@ jobs:
 
       - name: Deploy to EKS Autoscaler
         run: |
-          cd $(pwd)/../../autoscaler
+          cd ~
           kubectl apply -f autoscaler/cluster-autoscaler.yaml
 
   destroy:
