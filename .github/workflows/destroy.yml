@@ -73,7 +73,7 @@ jobs:
           smtp-port: 465
           smtp-secure: true
           from-email: ${{ secrets.MAIL_FROM }}
-          to-email: <RECEIVER_EMAIL_ADDRESS>,<OTHER_RECEIVER_EMAIL_ADDRESS> # Add multiple email addresses separated by commas
+          to-email: ${{ secrets.MAIL_TO }} # Use a secret for the recipient email addresses
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: "Destroy Workflow Notification: ${{ github.workflow }} - ${{ steps.pipeline-status.outputs.result }}"

@@ -142,8 +142,8 @@ jobs:
         if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         continue-on-error: true
 
-      - uses: actions/github-script@v7.0.1  # Corrected indentation
-        if: github.event_name == 'pull_request'
+      - uses: actions/github-script@v7.0.1
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
